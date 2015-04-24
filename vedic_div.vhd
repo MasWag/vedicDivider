@@ -14,40 +14,68 @@ entity vedic_div is
 end entity vedic_div;
 
 architecture rtl of vedic_div is
-  signal i_result : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_sign   : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_carry  : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_quo    : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_quo_p  : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_divisor : std_logic_vector (3 downto 0) := (others => '0');
+  signal i_result  : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_sign    : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry   : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_quo     : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_quo_p   : std_logic_vector (7 downto 0) := (others => '0');
   signal i_quo_p2  : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_quo_n  : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_quo_n   : std_logic_vector (7 downto 0) := (others => '0');
   signal i_quo_n2  : std_logic_vector (7 downto 0) := (others => '0');
-  signal i_re_p   : std_logic_vector (3 downto 0) := (others => '0');
+  signal i_re_p    : std_logic_vector (3 downto 0) := (others => '0');
   signal i_re_p2   : std_logic_vector (3 downto 0) := (others => '0');
-  signal i_re_n   : std_logic_vector (3 downto 0) := (others => '0');
+  signal i_re_n    : std_logic_vector (3 downto 0) := (others => '0');
   signal i_re_n2   : std_logic_vector (3 downto 0) := (others => '0');
 begin  -- architecture rtl
 
   i_quo_p2 <= std_logic_vector(unsigned(i_quo_p) + unsigned(i_result (7 downto 3) and not i_sign (7 downto 3)) + unsigned((i_carry (7 downto 3) and not i_sign (7 downto 3)) & '0'));
-  i_re_n2 <= std_logic_vector (unsigned (i_re_n) + unsigned (i_result (2 downto 0) and i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and i_sign (2 downto 0)));
+  i_re_n2  <= std_logic_vector (unsigned (i_re_n) + unsigned (i_result (2 downto 0) and i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and i_sign (2 downto 0)));
 
-  i_quo_n2 <= std_logic_vector(unsigned(i_quo_n) + unsigned(i_result (7 downto 3) and i_sign (7 downto 3)) + unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0') + 2) when unsigned(i_re_p) + unsigned (divisor) < unsigned(i_re_n) else
-             std_logic_vector(unsigned(i_quo_n) + unsigned(i_result (7 downto 3) and i_sign (7 downto 3)) + unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0') + 1) when unsigned (i_re_p) < unsigned (i_re_n) else
-             std_logic_vector(unsigned(i_quo_n) + unsigned(i_result (7 downto 3) and i_sign (7 downto 3)) + unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0'));
+  i_quo_n2 <= std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
+                                           + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
+                                           + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0'))
+                                           + 2, 8)) when unsigned(i_re_p) + unsigned (i_divisor) < unsigned(i_re_n) else
+              std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
+                                           + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
+                                           + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0'))
+                                           + 1, 8)) when unsigned (i_re_p) < unsigned (i_re_n) else
+              std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
+                                           + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
+                                           + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0')), 8));
 
-  i_re_p2  <= std_logic_vector (unsigned (i_re_p) + unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)) + unsigned(divisor & '0')) when unsigned(i_re_p) + unsigned (divisor) < unsigned(i_re_n) else
-             std_logic_vector (unsigned (i_re_p) + unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)) + unsigned(divisor)) when unsigned (i_re_p) < unsigned (i_re_n) else
-             std_logic_vector (unsigned (i_re_p) + unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)));
+  i_re_p2 <=
+    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
+                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
+                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)))
+                                  + to_integer(unsigned(i_divisor & '0')), 4))
+    when unsigned(i_re_p) + unsigned (i_divisor) < unsigned(i_re_n) else
+    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
+                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
+                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)))
+                                  + to_integer(unsigned(i_divisor)), 4))
+    when unsigned (i_re_p) < unsigned (i_re_n) else
+    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
+                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
+                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0))), 4));
 
-  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (divisor) select
+  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (i_divisor) select
     quo <=
-    std_logic_vector (unsigned (i_quo) + unsigned (i_quo_p2) - unsigned (i_quo_n2) + 1) when true,
-    std_logic_vector (unsigned (i_quo) + unsigned (i_quo_p2) - unsigned (i_quo_n2))     when others;
+    std_logic_vector (
+      to_unsigned(to_integer(unsigned (i_quo))
+                  + to_integer(unsigned (i_quo_p2))
+                  - to_integer(unsigned (i_quo_n2)) + 1, 8)) when true,
+    std_logic_vector (
+      to_unsigned(to_integer(unsigned (i_quo))
+                  + to_integer(unsigned (i_quo_p2) - unsigned (i_quo_n2)), 8)) when others;
 
-  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (divisor) select
+  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (i_divisor) select
     re <=
-    std_logic_vector (unsigned (i_re_p2) - unsigned (i_re_n2) - unsigned (divisor)) when true,
-    std_logic_vector (unsigned (i_re_p2) - unsigned (i_re_n2))                      when others;
+    std_logic_vector (
+      to_unsigned(to_integer(unsigned (i_re_p2) - unsigned (i_re_n2))
+                  - to_integer(unsigned (i_divisor)), 4)) when true,
+    std_logic_vector (
+      to_unsigned(to_integer(unsigned (i_re_p2) - unsigned (i_re_n2)), 4)) when others;
 
   -- purpose: set ret -> Q
   -- type : combinational
@@ -252,14 +280,14 @@ begin  -- architecture rtl
         b_sign (i)   := b_sign (i) or (reg_n (i) and not reg_p (i));
       end loop;  -- i
 
-      i_quo_p  <= quo_p;
-      i_quo_n  <= quo_n;
-      i_re_p   <= re_p;
-      i_re_n   <= re_n;
-      i_result <= b_result;
-      i_sign   <= b_sign;
-      i_carry  <= carry;
-
+      i_quo_p   <= quo_p;
+      i_quo_n   <= quo_n;
+      i_re_p    <= re_p;
+      i_re_n    <= re_n;
+      i_result  <= b_result;
+      i_sign    <= b_sign;
+      i_carry   <= carry;
+      i_divisor <= divisor;
     end if;
   end process set_loop;
 
