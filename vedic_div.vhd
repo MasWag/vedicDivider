@@ -126,17 +126,17 @@ begin  -- architecture rtl
       end if;
 
       if unsigned(reg_p (7 downto 4)) >= unsigned (divisor) then
-        reg_p := std_logic_vector(to_unsigned(to_integer(unsigned (reg_p)) - to_integer(unsigned(divisor & "00")), 8));
-        v_quo := std_logic_vector(to_unsigned(to_integer(unsigned(v_quo)) + 16, 8));
+        reg_p := std_logic_vector(to_unsigned(to_integer(unsigned (reg_p)) - to_integer(unsigned(divisor & x"0")), 8));
+        v_quo := x"10";
       end if;
 
       -- add lower 3bit to re
-      re_p               := dividend (3 downto 0);
+      re_p (2 downto 0)  := dividend (2 downto 0);
       reg_p (2 downto 0) := "000";
 
       for i in 7 downto 4 loop
         b_result (i) := b_result (i) or (reg_n (i) xor reg_p (i));
-        b_sign (i)   := b_sign (i) or ((reg_n (i)) and not reg_p (i));
+        b_sign (i)   := b_sign (i) or (reg_n (i) and not reg_p (i));
 
         for j in 1 to 3 loop
           -- -1
@@ -256,22 +256,22 @@ begin  -- architecture rtl
       for j in 1 to 3 loop
         -- -1
         if b_result (3) = '1' and b_sign (3) = '0' and carry (3) = '0' then
-          re_n := std_logic_vector(unsigned (re_n) + shift_left (arg => unsigned(b_n), count => 3-j));
+          re_n := std_logic_vector(unsigned (re_n) + unsigned(unsigned(b_n) and shift_left (arg => "001", count => 3-j)));
         -- +1
         elsif b_result (3) = '1' and b_sign (3) = '1' and carry (3) = '0' then
-          re_p := std_logic_vector(unsigned (re_p) + shift_left (arg => unsigned(b_n), count => 3-j));
+          re_p := std_logic_vector(unsigned (re_p) + unsigned(unsigned (b_n) and shift_left (arg => "001", count => 3-j)));
         -- -2
         elsif b_result (3) = '0' and b_sign (3) = '0' and carry (3) = '1' then
-          re_n := std_logic_vector(unsigned (re_n) + shift_left (arg => unsigned(b_n), count => 4-j));
+          re_n := std_logic_vector(unsigned (re_n) + unsigned(unsigned (b_n & '0') and shift_left (arg => x"1", count => 4-j)));
         -- +2
         elsif b_result (3) = '0' and b_sign (3) = '1' and carry (3) = '1' then
-          re_p := std_logic_vector(unsigned (re_p) + shift_left (arg => unsigned(b_n), count => 4-j));
+          re_p := std_logic_vector(unsigned (re_p) + unsigned(unsigned (b_n & '0') and shift_left (arg => x"1", count => 4-j)));
         -- -3
         elsif b_result (3) = '1' and b_sign (3) = '0' and carry (3) = '1' then
-          re_n := std_logic_vector(unsigned (re_n) + shift_left (arg => 3 * unsigned(b_n), count => 3-j));
+          re_n := std_logic_vector(unsigned (re_n) + 3 * unsigned (unsigned (b_n) and shift_left (arg => "001", count => 3-j)));
         -- +3
         elsif b_result (3) = '1' and b_sign (3) = '1' and carry (3) = '1' then
-          re_p := std_logic_vector(unsigned (re_p) + shift_left (arg => 3 * unsigned(b_n), count => 3-j));
+          re_p := std_logic_vector(unsigned (re_n) + 3 * unsigned (unsigned (b_n) and shift_left (arg => "001", count => 3-j)));
         end if;
       end loop;  -- j
 
