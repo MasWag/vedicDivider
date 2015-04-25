@@ -46,6 +46,14 @@ architecture rtl of vedic_div is
   signal i_reg_p2 : std_logic_vector (7 downto 0) := (others => '0');
   signal i_reg_p1 : std_logic_vector (7 downto 0) := (others => '0');
   signal i_reg_p0 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry7 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry6 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry5 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry4 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry3 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry2 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry1 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_carry0 : std_logic_vector (7 downto 0) := (others => '0');
   signal d_re_p7 : std_logic_vector (4 downto 0) := (others => '0');
   signal d_re_p6 : std_logic_vector (4 downto 0) := (others => '0');
   signal d_re_p5 : std_logic_vector (4 downto 0) := (others => '0');
@@ -166,18 +174,22 @@ begin  -- architecture rtl
         if i = 7 then
           i_reg_n7 <= reg_n;
           i_reg_p7 <= reg_p;
+          i_carry7 <= carry;
           d_re_p7 <= re_p;
         elsif i = 6 then
           i_reg_n6 <= reg_n;
           i_reg_p6 <= reg_p;
+          i_carry6 <= carry;
           d_re_p6 <= re_p;
         elsif i = 5 then
           i_reg_n5 <= reg_n;
           i_reg_p5 <= reg_p;
+          i_carry5 <= carry;
           d_re_p5 <= re_p;
         elsif i = 4 then
           i_reg_n4 <= reg_n;
           i_reg_p4 <= reg_p;
+          i_carry4 <= carry;
           d_re_p4 <= re_p;
         end if;
         for j in 1 to 3 loop
@@ -232,7 +244,7 @@ begin  -- architecture rtl
           -- +2 
           elsif b_result (i) = '0' and b_sign (i) = '1' and carry (i) = '1' then
             carry (i-j) := (not b_n (3-j) and carry (i-j)) or
-                           (b_n (3-j) and not (reg_n (i-j) or (not b_sign (i-j) and carry (i-j))));
+                           (b_n (3-j) and not (reg_n (i-j) or (b_sign (i-j) and carry (i-j))));
 
             reg_p (i-j)  := reg_p (i-j) or (b_n (3-j) and reg_n (i-j));
             reg_n (i-j)  := reg_n (i-j) and not b_n (3-j);
@@ -294,6 +306,7 @@ begin  -- architecture rtl
 
       i_reg_n3 <= reg_n;
       i_reg_p3 <= reg_p;
+      i_carry3 <= carry;
       d_re_p3 <= re_p;
       -- i = 3
       b_result (3) := b_result (3) or (reg_n (3) xor reg_p (3));
@@ -325,14 +338,17 @@ begin  -- architecture rtl
         if i = 2 then
           i_reg_n2 <= reg_n;
           i_reg_p2 <= reg_p;
+          i_carry2 <= carry;
           d_re_p2 <= re_p;
         elsif i = 1 then
           i_reg_n1 <= reg_n;
           i_reg_p1 <= reg_p;
+          i_carry1 <= carry;
           d_re_p1 <= re_p;
         elsif i = 0 then
           i_reg_n0 <= reg_n;
           i_reg_p0 <= reg_p;
+          i_carry0 <= carry;
           d_re_p0 <= re_p;
         end if;
         b_result (i) := b_result (i) or (reg_n (i) xor reg_p (i));
