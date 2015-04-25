@@ -1,0 +1,15 @@
+VHDLC = ghdl
+INCLUDES[] = 
+
+VHDL_FLAGS = "--ieee=synopsys" -fexplicit
+
+.DEFAULT: vedic_div_test
+
+vedic_div_test:vedic_div.o vedic_div_test.o
+	$(VHDLC) -e $(VHDL_FLAGS) $@
+
+%.o: %.vhd
+	$(VHDLC) -a $(VHDL_FLAGS) $<
+# Optional link options
+VHDL_LINK_FLAGS =
+
