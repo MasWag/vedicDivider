@@ -147,13 +147,13 @@ begin  -- architecture rtl
         b_result (i) := b_result (i) or (reg_n (i) xor reg_p (i));
         b_sign (i)   := b_sign (i) or (reg_n (i) and not reg_p (i));
         if i = 7 then
-          i_reg_n7 <= reg_p;
+          i_reg_n7 <= carry;
         elsif i = 6 then
-          i_reg_n6 <= reg_p;
+          i_reg_n6 <= carry;
         elsif i = 5 then
-          i_reg_n5 <= reg_p;
+          i_reg_n5 <= carry;
         elsif i = 4 then
-          i_reg_n4 <= reg_p;
+          i_reg_n4 <= carry;
         end if;
         for j in 1 to 3 loop
           -- -1
@@ -196,9 +196,6 @@ begin  -- architecture rtl
             end if;
 
             reg_p (i-j) := b_n (3-j) xor reg_p (i-j);
-            if j = 3 then
-              i_reg_n3 <= reg_p;
-            end if;
           -- -2
           elsif b_result (i) = '0' and b_sign (i) = '0' and carry (i) = '1' then
             carry (i-j) := (not b_n (3-j) and carry (i-j)) or
@@ -264,9 +261,22 @@ begin  -- architecture rtl
           reg_p (i-j) := (tmp0 (i-j) and (not b_sign (i-j) or not tmp2 (i-j))) or
                          (tmp1 (i-j) and tmp2 (i-j) and not b_sign (i-j));
           --TODO: tmp2 is unusable
-          carry (i-j) := (tmp2 (i-j) and not tmp1 (i-j) and not b_sign (i-j)) and
+          if j = 1 then
+            i_reg_n3 <= carry;
+            i_reg_n1 <= tmp0;
+            i_reg_n0 <= tmp1;
+          end if;
+          carry (i-j) := (tmp2 (i-j) and not (tmp1 (i-j) and (not b_sign (i-j)))) and
                          not (tmp0 (i-j) and b_sign (i-j));
+          if j = 1 then
+            i_reg_n2 (4) <= b_sign (i-j);
+            i_reg_n2 (3) <= tmp0 (i-j);
+            i_reg_n2 (2) <= tmp2 (i-j);
+            i_reg_n2 (1) <= tmp1 (i-j);
+            i_reg_n2 (0) <= carry (i-j);
+          end if;
         end loop;  -- j
+
       end loop;
 
       -- i = 3
@@ -297,9 +307,9 @@ begin  -- architecture rtl
 
       for i in 2 downto 0 loop
         if i = 2 then
-          i_reg_n2 <= reg_n;
+
         elsif i = 1 then
-          i_reg_n1 <= reg_n;
+
         elsif i = 0 then
           i_reg_n0 <= reg_n;
         end if;
