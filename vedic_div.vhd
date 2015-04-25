@@ -245,7 +245,7 @@ begin  -- architecture rtl
               reg_n (i-j) := '0';
 
               quo_n := std_logic_vector(unsigned(quo_n) + 4);
-              re_p  := std_logic_vector(to_unsigned(to_integer(unsigned(re_p) + unsigned(b_n & "00")), 8));
+              re_p  := std_logic_vector(to_unsigned(to_integer(unsigned(re_p)) + to_integer(unsigned(b_n & "00")), 5));
             else
               b_sign (i-j) := b_n (3-j);
               reg_n (i-j)  := reg_n (i-j) or b_n (3-j);
@@ -260,7 +260,7 @@ begin  -- architecture rtl
               reg_p (i-j) := '0';
 
               quo_p := std_logic_vector(unsigned(quo_p) + 4);
-              re_n  := std_logic_vector(to_unsigned(to_integer(unsigned(re_n) + unsigned(b_n & "00")), 8));
+              re_n  := std_logic_vector(to_unsigned(to_integer(unsigned(re_n)) + to_integer(unsigned(b_n & "00")), 5));
             else
               b_sign (i-j) := not b_n (3-j);
               reg_p (i-j)  := reg_p (i-j) or b_n (3-j);
@@ -341,6 +341,7 @@ begin  -- architecture rtl
 
       i_quo_p   <= quo_p;
       i_quo_n   <= quo_n;
+      i_quo     <= v_quo;
       i_re_p    <= re_p;
       i_re_n    <= re_n;
       i_result  <= b_result;
