@@ -23,59 +23,68 @@ architecture rtl of vedic_div is
   signal i_quo_p2  : std_logic_vector (7 downto 0) := (others => '0');
   signal i_quo_n   : std_logic_vector (7 downto 0) := (others => '0');
   signal i_quo_n2  : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_quo_n3  : std_logic_vector (7 downto 0) := (others => '0');
   signal i_re_p    : std_logic_vector (3 downto 0) := (others => '0');
-  signal i_re_p2   : std_logic_vector (3 downto 0) := (others => '0');
+  signal i_re_p2   : std_logic_vector (4 downto 0) := (others => '0');
+  signal i_re_p3   : std_logic_vector (4 downto 0) := (others => '0');
   signal i_re_n    : std_logic_vector (3 downto 0) := (others => '0');
-  signal i_re_n2   : std_logic_vector (3 downto 0) := (others => '0');
+  signal i_re_n2   : std_logic_vector (4 downto 0) := (others => '0');
+  signal test      : std_logic_vector (4 downto 0) := (others => '0');
+  signal i_reg_n7 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n6 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n5 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n4 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n3 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n2 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n1 : std_logic_vector (7 downto 0) := (others => '0');
+  signal i_reg_n0 : std_logic_vector (7 downto 0) := (others => '0');
 begin  -- architecture rtl
 
-  i_quo_p2 <= std_logic_vector(unsigned(i_quo_p) + unsigned(i_result (7 downto 3) and not i_sign (7 downto 3)) + unsigned((i_carry (7 downto 3) and not i_sign (7 downto 3)) & '0'));
-  i_re_n2  <= std_logic_vector (unsigned (i_re_n) + unsigned (i_result (2 downto 0) and i_sign (2 downto 0)) + unsigned (i_carry (2 downto 0) and i_sign (2 downto 0)));
+  i_quo_p2 <= std_logic_vector(unsigned(i_quo_p)
+                               + unsigned(i_result (7 downto 3) and not i_sign (7 downto 3))
+                               + unsigned((i_carry (7 downto 3) and not i_sign (7 downto 3)) & '0'));
+  i_re_n2 <= std_logic_vector (to_unsigned(to_integer(unsigned (i_re_n))
+                                           + to_integer(unsigned (i_result (2 downto 0) and i_sign (2 downto 0)))
+                                           + to_integer(unsigned (i_carry (2 downto 0) & "0" and i_sign (2 downto 0) & "0")), 5));
 
   i_quo_n2 <= std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
                                            + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
-                                           + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0'))
-                                           + 2, 8)) when unsigned(i_re_p) + unsigned (i_divisor) < unsigned(i_re_n) else
-              std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
-                                           + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
-                                           + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0'))
-                                           + 1, 8)) when unsigned (i_re_p) < unsigned (i_re_n) else
-              std_logic_vector(to_unsigned(to_integer(unsigned(i_quo_n))
-                                           + to_integer(unsigned(i_result (7 downto 3) and i_sign (7 downto 3)))
                                            + to_integer(unsigned((i_carry (7 downto 3) and i_sign (7 downto 3)) & '0')), 8));
 
-  i_re_p2 <=
-    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
-                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
-                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)))
-                                  + to_integer(unsigned(i_divisor & '0')), 4))
-    when unsigned(i_re_p) + unsigned (i_divisor) < unsigned(i_re_n) else
-    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
-                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
-                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0)))
-                                  + to_integer(unsigned(i_divisor)), 4))
-    when unsigned (i_re_p) < unsigned (i_re_n) else
-    std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
-                                  + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
-                                  + to_integer(unsigned (i_carry (2 downto 0) and not i_sign (2 downto 0))), 4));
+  i_quo_n3 <= std_logic_vector(unsigned(i_quo_n2) + 2)
+              when unsigned(i_re_p2) + unsigned (i_divisor) < unsigned(i_re_n2) else
+              std_logic_vector(unsigned (i_quo_n2) + 1)
+              when unsigned (i_re_p2) < unsigned (i_re_n2) else
+              i_quo_n2;
 
-  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (i_divisor) select
+  i_re_p2 <= std_logic_vector (to_unsigned(to_integer(unsigned (i_re_p))
+                                           + to_integer(unsigned (i_result (2 downto 0) and not i_sign (2 downto 0)))
+                                           + to_integer(unsigned (i_carry (2 downto 0) & "0" and not i_sign (2 downto 0) & "0")), 5));
+
+  i_re_p3 <= std_logic_vector (unsigned (i_re_p2) + to_integer(unsigned(i_divisor & '0')))
+             when to_integer(unsigned(i_re_p2)) + to_integer(unsigned (i_divisor)) < to_integer(unsigned(i_re_n2)) else
+             std_logic_vector (unsigned (i_re_p2) + to_integer(unsigned(i_divisor)))
+             when unsigned (i_re_p2) < unsigned (i_re_n2) else
+             i_re_p2;
+
+
+  with unsigned (i_re_p3) - unsigned (i_re_n2) >= unsigned (i_divisor) select
     quo <=
     std_logic_vector (
       to_unsigned(to_integer(unsigned (i_quo))
                   + to_integer(unsigned (i_quo_p2))
-                  - to_integer(unsigned (i_quo_n2)) + 1, 8)) when true,
+                  - to_integer(unsigned (i_quo_n3)) + 1, 8)) when true,
     std_logic_vector (
       to_unsigned(to_integer(unsigned (i_quo))
-                  + to_integer(unsigned (i_quo_p2) - unsigned (i_quo_n2)), 8)) when others;
+                  + to_integer(unsigned (i_quo_p2) - unsigned (i_quo_n3)), 8)) when others;
 
-  with unsigned (i_re_p2) - unsigned (i_re_n2) >= unsigned (i_divisor) select
+  with unsigned (i_re_p3) - unsigned (i_re_n2) >= unsigned (i_divisor) select
     re <=
     std_logic_vector (
-      to_unsigned(to_integer(unsigned (i_re_p2) - unsigned (i_re_n2))
+      to_unsigned(to_integer(unsigned (i_re_p3) - unsigned (i_re_n2))
                   - to_integer(unsigned (i_divisor)), 4)) when true,
     std_logic_vector (
-      to_unsigned(to_integer(unsigned (i_re_p2) - unsigned (i_re_n2)), 4)) when others;
+      to_unsigned(to_integer(unsigned (i_re_p3) - unsigned (i_re_n2)), 4)) when others;
 
   -- purpose: set ret -> Q
   -- type : combinational
@@ -137,7 +146,15 @@ begin  -- architecture rtl
       for i in 7 downto 4 loop
         b_result (i) := b_result (i) or (reg_n (i) xor reg_p (i));
         b_sign (i)   := b_sign (i) or (reg_n (i) and not reg_p (i));
-
+        if i = 7 then
+          i_reg_n7 <= reg_p;
+        elsif i = 6 then
+          i_reg_n6 <= reg_p;
+        elsif i = 5 then
+          i_reg_n5 <= reg_p;
+        elsif i = 4 then
+          i_reg_n4 <= reg_p;
+        end if;
         for j in 1 to 3 loop
           -- -1
           if b_result (i) = '1' and b_sign (i) = '0' and carry (i) = '0' then
@@ -159,13 +176,12 @@ begin  -- architecture rtl
 
             end if;
             reg_n (i-j) := b_n (3-j) xor reg_n (i-j);
-
           -- +1
           elsif b_result (i) = '1' and b_sign (i) = '1' and carry (i) = '0' then
-
+            
             if j /= 1 and reg_p (i-j+1) = '0' then
 
-              reg_p (i-j+1) := (b_n (3-j) and reg_p (i-j)) or reg_n (i-j+1);
+              reg_p (i-j+1) := (b_n (3-j) and reg_p (i-j)) or reg_p (i-j+1);
 
             elsif j /= 1 and reg_p (i-j) = '1' and reg_p (i-j+1) = '1' and carry (i-j+1) = '0' then
 
@@ -175,12 +191,14 @@ begin  -- architecture rtl
             else
 
               carry (i-j)  := carry (i-j) or (b_n(3-j) and reg_p (i-j));
-              b_sign (i-j) := not (reg_p (i-j) and b_n (3-j)) and reg_n (i-j);
+              b_sign (i-j) := not (reg_p (i-j) and b_n (3-j)) and b_sign (i-j);
 
             end if;
 
             reg_p (i-j) := b_n (3-j) xor reg_p (i-j);
-
+            if j = 3 then
+              i_reg_n3 <= reg_p;
+            end if;
           -- -2
           elsif b_result (i) = '0' and b_sign (i) = '0' and carry (i) = '1' then
             carry (i-j) := (not b_n (3-j) and carry (i-j)) or
@@ -233,19 +251,20 @@ begin  -- architecture rtl
         for j in 1 to 3 loop
           tmp0 := reg_p;
           tmp1 := reg_n;
-
+          
           reg_p (i-j) := tmp0 (i-j) and not tmp1 (i-j);
           reg_n (i-j) := tmp1 (i-j) and not tmp0 (i-j);
 
           tmp0 := reg_p;
           tmp1 := reg_n;
           tmp2 := carry;
-
+          
           reg_n (i-j) := (tmp1 (i-j) and (b_sign (i-j) or not tmp2 (i-j))) or
                          (tmp0 (i-j) and tmp2 (i-j) and b_sign (i-j));
           reg_p (i-j) := (tmp0 (i-j) and (not b_sign (i-j) or not tmp2 (i-j))) or
                          (tmp1 (i-j) and tmp2 (i-j) and not b_sign (i-j));
-          carry (i-j) := (carry (i-j) and not tmp1 (i-j) and not b_sign (i-j)) and
+          --TODO: tmp2 is unusable
+          carry (i-j) := (tmp2 (i-j) and not tmp1 (i-j) and not b_sign (i-j)) and
                          not (tmp0 (i-j) and b_sign (i-j));
         end loop;  -- j
       end loop;
@@ -253,6 +272,7 @@ begin  -- architecture rtl
       -- i = 3
       b_result (3) := b_result (3) or (reg_n (3) xor reg_p (3));
       b_sign (3)   := b_sign (3) or (reg_n (3) and not reg_p (3));
+
       for j in 1 to 3 loop
         -- -1
         if b_result (3) = '1' and b_sign (3) = '0' and carry (3) = '0' then
@@ -276,6 +296,13 @@ begin  -- architecture rtl
       end loop;  -- j
 
       for i in 2 downto 0 loop
+        if i = 2 then
+          i_reg_n2 <= reg_n;
+        elsif i = 1 then
+          i_reg_n1 <= reg_n;
+        elsif i = 0 then
+          i_reg_n0 <= reg_n;
+        end if;
         b_result (i) := b_result (i) or (reg_n (i) xor reg_p (i));
         b_sign (i)   := b_sign (i) or (reg_n (i) and not reg_p (i));
       end loop;  -- i
