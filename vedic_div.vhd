@@ -5,7 +5,7 @@ use ieee.numeric_std.all;
 entity vedic_div is
 
   port (
-    clk      : in  std_logic;
+    mclk1      : in  std_logic;
     divisor  : in  std_logic_vector (3 downto 0);
     dividend : in  std_logic_vector (7 downto 0);
     quo      : out std_logic_vector (7 downto 0);
@@ -113,9 +113,9 @@ begin  -- architecture rtl
 
   -- purpose: set ret -> Q
   -- type : combinational
-  -- inputs : CLK
+  -- inputs : MCLK1
   -- outputs: Q
-  set_loop : process (clk) is
+  set_loop : process (mclk1) is
     variable reg_n    : std_logic_vector (7 downto 0) := (others => '0');  -- negative_register
     variable reg_p    : std_logic_vector (7 downto 0) := (others => '0');  -- positive_register
     variable quo_p    : std_logic_vector (7 downto 0) := (others => '0');
@@ -132,7 +132,7 @@ begin  -- architecture rtl
     variable tmp1     : std_logic_vector (7 downto 0) := (others => '0');
     variable tmp2     : std_logic_vector (7 downto 0) := (others => '0');
   begin  -- process set_loop
-    if rising_edge (clk) then
+    if rising_edge (mclk1) then
 
       -- init
       reg_n    := (others => '0');
