@@ -63,12 +63,13 @@ begin  -- architecture rtl
       shift_val <= 31 - i;
       b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (shift_val + 30 downto shift_val)),
                                           count => shift_val));
-      init_reg.quo_reg <= dividend (31 downto i);
+      init_reg.quo_reg (31 - i downto 0) <= dividend (31 downto i);
       if i = 0 then
         init_reg.re_reg <= (others => '0');
       else
-        init_reg.re_reg <= std_logic_vector(shift_left(arg   => unsigned(dividend (i-1 downto 0)),
-                                                       count => shift_val));
+        init_reg.quo_reg (31 downto 32 - i) <= (others => '0');
+        init_reg.re_reg (31 downto 32 - i) <= dividend (i-1 downto 0);
+        init_reg.re_reg (31 - i downto 0) <= (others => '0');
       end if;
       exit;
     end loop;  -- i
