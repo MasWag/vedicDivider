@@ -33,7 +33,8 @@ architecture rtl of vedic_div32 is
 
   signal b_n   : std_logic_vector (30 downto 0) := (others => '0');
   signal state : state_t                        := init_state;
-
+  signal i_re  : std_logic_vector (31 downto 0) := (others => '0');
+  signal i_quo : std_logic_vector (31 downto 0) := (others => '0');
 begin  -- architecture rtl
 
   with state select
@@ -179,15 +180,28 @@ begin  -- architecture rtl
         end if;
       end loop;  -- t
 
-      for t in 0 to 8 loop
-        if v_re >= to_integer(unsigned(divisor)) then
-          v_re      := v_re - to_integer(unsigned(divisor));
-          v_reg.quo := std_logic_vector(unsigned(v_reg.quo) + 1);
-        end if;
-      end loop;  -- t
-      re  <= std_logic_vector(v_re (31 downto 0));
-      quo <= v_reg.quo;
+      i_re  <= std_logic_vector(v_re (31 downto 0));
+      i_quo <= v_reg.quo;
+
     end if;
   end process fin_calc;
+
+  re <= std_logic_vector(unsigned(i_re) - 7 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 7 else
+        std_logic_vector(unsigned(i_re) - 6 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 6 else
+        std_logic_vector(unsigned(i_re) - 5 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 5 else
+        std_logic_vector(unsigned(i_re) - 4 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 4 else
+        std_logic_vector(unsigned(i_re) - 3 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 3 else
+        std_logic_vector(unsigned(i_re) - 2 * to_integer(unsigned(divisor))) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 2 else
+        std_logic_vector(unsigned(i_re) - to_integer(unsigned(divisor)))     when unsigned(i_re) >= to_integer(unsigned(divisor)) else
+        i_re;
+
+  quo <= std_logic_vector(unsigned(i_quo) + 7) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 7 else
+         std_logic_vector(unsigned(i_quo) + 6) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 6 else
+         std_logic_vector(unsigned(i_quo) + 5) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 5 else
+         std_logic_vector(unsigned(i_quo) + 4) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 4 else
+         std_logic_vector(unsigned(i_quo) + 3) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 3 else
+         std_logic_vector(unsigned(i_quo) + 2) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 2 else
+         std_logic_vector(unsigned(i_quo) + 1) when unsigned(i_re) >= to_integer(unsigned(divisor)) else
+         i_quo;
 
 end architecture rtl;
