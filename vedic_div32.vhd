@@ -55,7 +55,7 @@ begin  -- architecture rtl
   -- type   : combinational
   -- inputs : divisor,dividend
   -- outputs: shifted_divisor,shift_val,re_reg,quo_reg,b_n
-  init_calc : process (divisor,dividend) is
+  init_calc : process (divisor, dividend) is
   begin  -- process init_calc
 
     for i in 31 downto 0 loop
@@ -105,8 +105,8 @@ begin  -- architecture rtl
         v_reg.quo_reg := v_reg.quo_reg (i-1 downto 0);
       end if;
 
-      quo_tmp := tmp_quo_reg * unsigned(b_n (30 downto 31 - i));
-      re_tmp := shift_left(arg   => tmp_quo_reg * unsigned(b_n (30 - i downto 0)),
+      quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
+      re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg) * to_integer(unsigned(b_n (30 - i downto 0)))), 32),
                            count => i);
 
       tmp_sign := v_reg.quo_sign;
@@ -114,17 +114,17 @@ begin  -- architecture rtl
       if tmp_sign /= v_reg.quo_sign then
         v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) + quo_tmp);
       elsif unsigned(v_reg.quo_reg) > quo_tmp then
-        v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) - quo_tmp);
+        v_reg.quo_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.quo_reg)) - to_integer(quo_tmp), 32));
       else
-        v_reg.quo_reg := std_logic_vector(quo_tmp - unsigned(v_reg.quo_reg));
+        v_reg.quo_reg := std_logic_vector(to_unsigned(to_integer(quo_tmp) - to_integer(unsigned(v_reg.quo_reg)), 32));
       end if;
 
       if tmp_sign /= v_reg.re_sign then
-        v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) + re_tmp);
+        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.re_reg)) + to_integer(re_tmp), 36));
       elsif unsigned(v_reg.re_reg) > re_tmp then
-        v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) - re_tmp);
+        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.re_reg)) - to_integer(re_tmp), 36));
       else
-        v_reg.re_reg := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
+        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(re_tmp) - to_integer(unsigned(v_reg.re_reg)), 36));
       end if;
 
       -- from here
