@@ -106,7 +106,7 @@ begin  -- architecture rtl
       end if;
 
       quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
-      re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg) * to_integer(unsigned(b_n (30 - i downto 0)))), 32),
+      re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 - i downto 0))), 32),
                            count => i);
 
       tmp_sign := v_reg.quo_sign;
@@ -120,11 +120,11 @@ begin  -- architecture rtl
       end if;
 
       if tmp_sign /= v_reg.re_sign then
-        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.re_reg)) + to_integer(re_tmp), 36));
+        v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) + re_tmp);
       elsif unsigned(v_reg.re_reg) > re_tmp then
-        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.re_reg)) - to_integer(re_tmp), 36));
+        v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) - re_tmp);
       else
-        v_reg.re_reg := std_logic_vector(to_unsigned(to_integer(re_tmp) - to_integer(unsigned(v_reg.re_reg)), 36));
+        v_reg.re_reg := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
       end if;
 
       -- from here
