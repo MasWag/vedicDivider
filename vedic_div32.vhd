@@ -60,12 +60,14 @@ begin  -- architecture rtl
     for i in 31 downto 0 loop
       next when divisor (i) = '0';
       init_reg.shift_val <= 31 - i;
-      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (61 - i downto 31 - i)),
-                                          count => 31 - i));
+
       init_reg.quo_reg <= dividend (31 downto i);
       if i = 0 then
         init_reg.re_reg <= (others => '0');
+        b_n             <= (others => '0');
       else
+        b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (30 downto 31 - i)),
+                                            count => 31 - i));
         init_reg.re_reg <= std_logic_vector(shift_left(arg   => unsigned(dividend (i-1 downto 0)),
                                                        count => 31 - i));
       end if;
