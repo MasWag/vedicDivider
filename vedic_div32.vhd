@@ -99,11 +99,7 @@ begin  -- architecture rtl
         v_reg.quo := std_logic_vector(unsigned(v_reg.quo) - shift_left(arg => tmp_quo_reg, count => i));
       end if;
 
-      if i = 0 then
-        v_reg.quo_reg := (others => '0');
-      else
-        v_reg.quo_reg := v_reg.quo_reg (i-1 downto 0);
-      end if;
+      v_reg.quo_reg (31 downto i):= (others => '0');
 
       quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
       re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 - i downto 0))), 32),
@@ -174,7 +170,8 @@ begin  -- architecture rtl
         v_re := signed(unsigned(not v_reg.re_reg) + 1);
       end if;
 
-      i_re  <= shift_right (arg => v_re, count => shift_val);
+      v_re := shift_right (arg => v_re, count => shift_val);
+      i_re  <= v_re (31 downto 0);
       i_quo <= v_reg.quo;
 
     end if;
