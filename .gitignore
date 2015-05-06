@@ -57,3 +57,4 @@ vedic_div_preshift_test
 *.cmd
 *.wcfg
 *.xmsgs
+vedic_div32_test
