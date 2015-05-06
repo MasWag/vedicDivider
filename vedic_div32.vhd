@@ -116,7 +116,8 @@ begin  -- architecture rtl
       elsif unsigned(v_reg.quo_reg) > quo_tmp then
         v_reg.quo_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.quo_reg)) - to_integer(quo_tmp), 32));
       else
-        v_reg.quo_reg := std_logic_vector(to_unsigned(to_integer(quo_tmp) - to_integer(unsigned(v_reg.quo_reg)), 32));
+        v_reg.quo_sign := not v_reg.quo_sign;
+        v_reg.quo_reg  := std_logic_vector(to_unsigned(to_integer(quo_tmp) - to_integer(unsigned(v_reg.quo_reg)), 32));
       end if;
 
       if tmp_sign /= v_reg.re_sign then
@@ -124,7 +125,8 @@ begin  -- architecture rtl
       elsif unsigned(v_reg.re_reg) > re_tmp then
         v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) - re_tmp);
       else
-        v_reg.re_reg := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
+        v_reg.re_sign := not v_reg.re_sign;
+        v_reg.re_reg  := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
       end if;
 
       -- from here
@@ -172,10 +174,10 @@ begin  -- architecture rtl
         v_re := signed(unsigned(not v_reg.re_reg) + 1);
       end if;
 
-      i_re <= shift_right (arg => v_re, count => shift_val);
+      i_re  <= shift_right (arg => v_re, count => shift_val);
       i_quo <= v_reg.quo;
 
-     end if;
+    end if;
   end process fin_calc;
 
   re <= std_logic_vector(i_re - 7 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 7 else
@@ -185,13 +187,13 @@ begin  -- architecture rtl
         std_logic_vector(i_re - 3 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 3 else
         std_logic_vector(i_re - 2 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 2 else
         std_logic_vector(i_re - to_integer(unsigned(divisor)))     when i_re >= to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re) when i_re >= 0 else
+        std_logic_vector(i_re)                                     when i_re >= 0 else
         std_logic_vector(i_re + to_integer(unsigned(divisor)))     when i_re >= -to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 2 * to_integer(unsigned(divisor)))     when i_re >= - 2 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 3 * to_integer(unsigned(divisor)))     when i_re >= - 3 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 4 * to_integer(unsigned(divisor)))     when i_re >= - 4 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 5 * to_integer(unsigned(divisor)))     when i_re >= - 5 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 6 * to_integer(unsigned(divisor)))     when i_re >= - 6 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 2 * to_integer(unsigned(divisor))) when i_re >= - 2 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 3 * to_integer(unsigned(divisor))) when i_re >= - 3 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 4 * to_integer(unsigned(divisor))) when i_re >= - 4 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 5 * to_integer(unsigned(divisor))) when i_re >= - 5 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 6 * to_integer(unsigned(divisor))) when i_re >= - 6 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 7 * to_integer(unsigned(divisor)));
 
   quo <= std_logic_vector(unsigned(i_quo) + 7) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 7 else
@@ -201,13 +203,13 @@ begin  -- architecture rtl
          std_logic_vector(unsigned(i_quo) + 3) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 3 else
          std_logic_vector(unsigned(i_quo) + 2) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 2 else
          std_logic_vector(unsigned(i_quo) + 1) when unsigned(i_re) >= to_integer(unsigned(divisor)) else
-         i_quo when i_re >= 0 else
-         std_logic_vector(unsigned(i_quo) - 1)     when i_re >= -to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 2)     when i_re >= - 2 * to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 3)     when i_re >= - 3 * to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 4)     when i_re >= - 4 * to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 5)     when i_re >= - 5 * to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 6)     when i_re >= - 6 * to_integer(unsigned(divisor)) else
+         i_quo                                 when i_re >= 0 else
+         std_logic_vector(unsigned(i_quo) - 1) when i_re >= -to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 2) when i_re >= - 2 * to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 3) when i_re >= - 3 * to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 4) when i_re >= - 4 * to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 5) when i_re >= - 5 * to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 6) when i_re >= - 6 * to_integer(unsigned(divisor)) else
          std_logic_vector(unsigned(i_quo) - 7);
 
 end architecture rtl;
