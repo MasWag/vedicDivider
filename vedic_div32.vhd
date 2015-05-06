@@ -17,24 +17,25 @@ end entity vedic_div32;
 architecture rtl of vedic_div32 is
   type unit_reg_t is array(natural range <>) of integer range 0 to 32;
   type reg_t is record
-    quo_reg   : std_logic_vector (31 downto 0);
-    re_reg    : std_logic_vector (35 downto 0);
-    quo       : std_logic_vector (31 downto 0);
-    quo_sign  : std_logic;              -- 0 : positive,1 : negative
-    re_sign   : std_logic;              -- 0 : positive,1 : negative
-    shift_val : integer range 0 to 31;
+    quo_reg  : std_logic_vector (31 downto 0);
+    re_reg   : std_logic_vector (35 downto 0);
+    quo      : std_logic_vector (31 downto 0);
+    quo_sign : std_logic;               -- 0 : positive,1 : negative
+    re_sign  : std_logic;               -- 0 : positive,1 : negative
   end record reg_t;
 
   type state_t is (init_state, main_state, wait_state, fin_state);
 
-  signal reg      : reg_t := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
-  signal init_reg : reg_t := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
-  signal main_reg : reg_t := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
+  signal reg      : reg_t := (quo_sign => '0', re_sign => '0', others => (others => '0'));
+  signal init_reg : reg_t := (quo_sign => '0', re_sign => '0', others => (others => '0'));
+  signal main_reg : reg_t := (quo_sign => '0', re_sign => '0', others => (others => '0'));
 
-  signal b_n   : std_logic_vector (30 downto 0) := (others => '0');
-  signal state : state_t                        := init_state;
-  signal i_re  : std_logic_vector (31 downto 0) := (others => '0');
-  signal i_quo : std_logic_vector (31 downto 0) := (others => '0');
+  signal b_n       : std_logic_vector (30 downto 0) := (others => '0');
+  signal state     : state_t                        := init_state;
+  signal i_re      : std_logic_vector (31 downto 0) := (others => '0');
+  signal i_quo     : std_logic_vector (31 downto 0) := (others => '0');
+  signal shift_val : integer range 0 to 31          := 0;
+
 begin  -- architecture rtl
 
   with state select
@@ -47,7 +48,6 @@ begin  -- architecture rtl
   -- inputs : clk
   -- outputs: init_reg
 
-  init_reg.quo      <= (others => '0');
   init_reg.quo_sign <= '0';
   init_reg.re_sign  <= '0';
 
@@ -55,20 +55,20 @@ begin  -- architecture rtl
   -- type   : combinational
   -- inputs : divisor,dividend
   -- outputs: shifted_divisor,shift_val,re_reg,quo_reg,b_n
-  init_calc : process (divisor, dividend) is
+  init_calc : process (divisor,dividend) is
   begin  -- process init_calc
 
     for i in 31 downto 0 loop
       next when divisor (i) = '0';
-      init_reg.shift_val <= 31 - i;
-      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (61 - i downto 31 - i)),
-                                          count => 31 - i));
+      shift_val <= 31 - i;
+      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (shift_val + 30 downto shift_val)),
+                                          count => shift_val));
       init_reg.quo_reg <= dividend (31 downto i);
       if i = 0 then
         init_reg.re_reg <= (others => '0');
       else
         init_reg.re_reg <= std_logic_vector(shift_left(arg   => unsigned(dividend (i-1 downto 0)),
-                                                       count => 31 - i));
+                                                       count => shift_val));
       end if;
       exit;
     end loop;  -- i
@@ -84,7 +84,7 @@ begin  -- architecture rtl
     variable quo_tmp     : unsigned (31 downto 0) := (others   => '0');
     variable re_tmp      : unsigned (31 downto 0) := (others   => '0');
     variable tmp_sign    : std_logic              := '0';
-    variable v_reg       : reg_t                  := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
+    variable v_reg       : reg_t                  := (quo_sign => '0', re_sign => '0', others => (others => '0'));
     variable i           : integer range 0 to 31  := 31;
   begin  -- process main_calc
     -- i = 31 downto 0
@@ -99,7 +99,11 @@ begin  -- architecture rtl
         v_reg.quo := std_logic_vector(unsigned(v_reg.quo) - shift_left(arg => tmp_quo_reg, count => i));
       end if;
 
-      v_reg.quo_reg (31 downto i) := (others => '0');
+      if i = 0 then
+        v_reg.quo_reg := (others => '0');
+      else
+        v_reg.quo_reg := v_reg.quo_reg (i-1 downto 0);
+      end if;
 
       quo_tmp := tmp_quo_reg * unsigned(b_n (30 downto 31 - i));
       re_tmp := shift_left(arg   => tmp_quo_reg * unsigned(b_n (30 - i downto 0)),
@@ -112,8 +116,7 @@ begin  -- architecture rtl
       elsif unsigned(v_reg.quo_reg) > quo_tmp then
         v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) - quo_tmp);
       else
-        v_reg.quo_sign := not v_reg.quo_sign;
-        v_reg.quo_reg  := std_logic_vector(quo_tmp - unsigned(v_reg.quo_reg));
+        v_reg.quo_reg := std_logic_vector(quo_tmp - unsigned(v_reg.quo_reg));
       end if;
 
       if tmp_sign /= v_reg.re_sign then
@@ -121,10 +124,10 @@ begin  -- architecture rtl
       elsif unsigned(v_reg.re_reg) > re_tmp then
         v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) - re_tmp);
       else
-        v_reg.re_sign := not v_reg.re_sign;
-        v_reg.re_reg  := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
+        v_reg.re_reg := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
       end if;
 
+      -- from here
       -- i = 31 downto 0
       if i = 0 then
         i := 31;
@@ -152,8 +155,8 @@ begin  -- architecture rtl
   -- inputs : clk
   -- outputs: fin_reg
   fin_calc : process (mclk1) is
-    variable k_reg : reg_t := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
-    variable v_reg : reg_t := (quo_sign => '0', re_sign => '0', shift_val => 0, others => (others => '0'));
+    variable k_reg : reg_t := (quo_sign => '0', re_sign => '0', others => (others => '0'));
+    variable v_reg : reg_t := (quo_sign => '0', re_sign => '0', others => (others => '0'));
     variable v_re  : signed (35 downto 0);
   begin  -- process fin_calc
     if rising_edge (mclk1) then
@@ -169,7 +172,7 @@ begin  -- architecture rtl
         v_re := signed(unsigned(not v_reg.re_reg) + 1);
       end if;
 
-      v_re := shift_right (arg => v_re, count => v_reg.shift_val);
+      v_re := shift_right (arg => v_re, count => shift_val);
 
       for t in 0 to 8 loop
         if v_re < 0 then
