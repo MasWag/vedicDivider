@@ -13,7 +13,7 @@ end entity vedic_div_test;
 architecture test of vedic_div_test is
   component vedic_div is
     port (
-      clk      : in  std_logic;
+      mclk1      : in  std_logic;
       divisor  : in  std_logic_vector (3 downto 0);
       dividend : in  std_logic_vector (7 downto 0);
       quo      : out std_logic_vector (7 downto 0);
@@ -39,7 +39,7 @@ begin  -- architecture test
 
   vedic_div_1: vedic_div
     port map (
-      clk      => clk,
+      mclk1      => clk,
       divisor  => divisor,
       dividend => dividend,
       quo      => quo,
