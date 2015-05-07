@@ -36,6 +36,7 @@ architecture rtl of vedic_div32 is
   signal i_quo     : std_logic_vector (31 downto 0) := (others => '0');
   signal shift_val : integer range 0 to 31          := 0;
 
+  signal d_state : integer range 0 to 3 := 0;
 begin  -- architecture rtl
 
   with state select
@@ -61,13 +62,15 @@ begin  -- architecture rtl
     for i in 31 downto 0 loop
       next when divisor (i) = '0';
       shift_val <= 31 - i;
-      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (shift_val + 30 downto shift_val)),
-                                          count => shift_val));
+      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (30 downto 0)),
+                                          count => 31-i));
       init_reg.quo_reg (31 - i downto 0) <= dividend (31 downto i);
       if i = 0 then
         init_reg.re_reg <= (others => '0');
       else
         init_reg.quo_reg (31 downto 32 - i) <= (others => '0');
+
+        -- INFO:Xst:1608 - Relative priorities of control signals on register <init_reg.re_reg> differ from those commonly found in the selected device family. This will result in additional logic around the register.
         init_reg.re_reg (31 downto 32 - i) <= dividend (i-1 downto 0);
         init_reg.re_reg (31 - i downto 0) <= (others => '0');
       end if;
@@ -136,13 +139,17 @@ begin  -- architecture rtl
 
       if state = main_state and i = 31 then
         state <= fin_state;
+        d_state <= 2;
       elsif go = '1' then
         i     := 31;
         state <= init_state;
+        d_state <= 0;
       elsif state = init_state then
         state <= main_state;
+        d_state <= 1;
       elsif state = fin_state then
         state <= wait_state;
+        d_state <= 3;
       end if;
 
       main_reg <= v_reg;
