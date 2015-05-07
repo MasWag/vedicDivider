@@ -37,6 +37,9 @@ architecture rtl of vedic_div32 is
   signal shift_val : integer range 0 to 31          := 0;
 
   signal d_state : integer range 0 to 3 := 0;
+  signal d_init_quo_reg : std_logic_vector (31 downto 0) := (others => '0');
+  signal d_init_re_reg : std_logic_vector (31 downto 0) := (others => '0');
+  signal d_re : std_logic_vector (35 downto 0) := (others => '0');
 begin  -- architecture rtl
 
   with state select
@@ -65,13 +68,17 @@ begin  -- architecture rtl
       b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (30 downto 0)),
                                           count => 31-i));
       init_reg.quo_reg (31 - i downto 0) <= dividend (31 downto i);
+      d_init_quo_reg (31 - i downto 0)  <= dividend (31 downto i);
       if i = 0 then
         init_reg.re_reg <= (others => '0');
+        d_init_quo_reg <= (others => '0');
       else
         init_reg.quo_reg (31 downto 32 - i) <= (others => '0');
-
+        d_init_quo_reg (31 downto 32 - i) <= (others => '0');
         -- INFO:Xst:1608 - Relative priorities of control signals on register <init_reg.re_reg> differ from those commonly found in the selected device family. This will result in additional logic around the register.
-        init_reg.re_reg (31 downto 32 - i) <= dividend (i-1 downto 0);
+        init_reg.re_reg (30 downto 31 - i) <= dividend (i - 1 downto 0);
+        d_init_re_reg (30 downto 31 - i) <= dividend (i - 1 downto 0);
+        d_init_re_reg (30 - i downto 0) <= (others => '0');
         init_reg.re_reg (31 - i downto 0) <= (others => '0');
       end if;
       exit;
@@ -178,14 +185,16 @@ begin  -- architecture rtl
         v_re := signed(unsigned(not v_reg.re_reg) + 1);
       end if;
 
+      
       v_re := shift_right (arg => v_re, count => shift_val);
       i_re  <= v_re (31 downto 0);
       i_quo <= v_reg.quo;
-
+      d_re <= v_reg.re_reg;
     end if;
   end process fin_calc;
 
-  re <= std_logic_vector(i_re - 7 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 7 else
+  re <= std_logic_vector(i_re - 8 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 8 else
+        std_logic_vector(i_re - 7 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 7 else
         std_logic_vector(i_re - 6 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 6 else
         std_logic_vector(i_re - 5 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 5 else
         std_logic_vector(i_re - 4 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 4 else
@@ -199,15 +208,17 @@ begin  -- architecture rtl
         std_logic_vector(i_re + 4 * to_integer(unsigned(divisor))) when i_re >= - 4 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 5 * to_integer(unsigned(divisor))) when i_re >= - 5 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 6 * to_integer(unsigned(divisor))) when i_re >= - 6 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 7 * to_integer(unsigned(divisor)));
+        std_logic_vector(i_re + 7 * to_integer(unsigned(divisor))) when i_re >= - 7 * to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 8 * to_integer(unsigned(divisor)));
 
-  quo <= std_logic_vector(unsigned(i_quo) + 7) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 7 else
-         std_logic_vector(unsigned(i_quo) + 6) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 6 else
-         std_logic_vector(unsigned(i_quo) + 5) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 5 else
-         std_logic_vector(unsigned(i_quo) + 4) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 4 else
-         std_logic_vector(unsigned(i_quo) + 3) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 3 else
-         std_logic_vector(unsigned(i_quo) + 2) when unsigned(i_re) >= to_integer(unsigned(divisor)) * 2 else
-         std_logic_vector(unsigned(i_quo) + 1) when unsigned(i_re) >= to_integer(unsigned(divisor)) else
+  quo <= std_logic_vector(unsigned(i_quo) + 8) when i_re >= to_integer(unsigned(divisor)) * 8 else
+         std_logic_vector(unsigned(i_quo) + 7) when i_re >= to_integer(unsigned(divisor)) * 7 else
+         std_logic_vector(unsigned(i_quo) + 6) when i_re >= to_integer(unsigned(divisor)) * 6 else
+         std_logic_vector(unsigned(i_quo) + 5) when i_re >= to_integer(unsigned(divisor)) * 5 else
+         std_logic_vector(unsigned(i_quo) + 4) when i_re >= to_integer(unsigned(divisor)) * 4 else
+         std_logic_vector(unsigned(i_quo) + 3) when i_re >= to_integer(unsigned(divisor)) * 3 else
+         std_logic_vector(unsigned(i_quo) + 2) when i_re >= to_integer(unsigned(divisor)) * 2 else
+         std_logic_vector(unsigned(i_quo) + 1) when i_re >= to_integer(unsigned(divisor)) else
          i_quo                                 when i_re >= 0 else
          std_logic_vector(unsigned(i_quo) - 1) when i_re >= -to_integer(unsigned(divisor)) else
          std_logic_vector(unsigned(i_quo) - 2) when i_re >= - 2 * to_integer(unsigned(divisor)) else
@@ -215,6 +226,7 @@ begin  -- architecture rtl
          std_logic_vector(unsigned(i_quo) - 4) when i_re >= - 4 * to_integer(unsigned(divisor)) else
          std_logic_vector(unsigned(i_quo) - 5) when i_re >= - 5 * to_integer(unsigned(divisor)) else
          std_logic_vector(unsigned(i_quo) - 6) when i_re >= - 6 * to_integer(unsigned(divisor)) else
-         std_logic_vector(unsigned(i_quo) - 7);
+         std_logic_vector(unsigned(i_quo) - 7) when i_re >= - 7 * to_integer(unsigned(divisor)) else
+         std_logic_vector(unsigned(i_quo) - 8);
 
 end architecture rtl;
