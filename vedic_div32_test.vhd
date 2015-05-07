@@ -54,7 +54,7 @@ begin  -- architecture test
     variable dd : std_logic_vector (31 downto 0) := (others => '0');
     variable ss : character;
     variable st : integer                        := 0;
-    constant li : integer                        := 32;
+    constant li : integer                        := 33;
   begin  -- process file_loop
     if not endfile(inf) then
       wait for clk_period/2;
