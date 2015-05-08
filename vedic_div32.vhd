@@ -112,9 +112,18 @@ begin  -- architecture rtl
 
       v_reg.quo_reg (31 downto i):= (others => '0');
 
-      quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
-      re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 - i downto 0))), 32),
-                           count => i);
+      if i = 0 then
+        quo_tmp := (others => '0');
+      else
+        quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
+      end if;
+
+      if i = 31 then
+        re_tmp := (others => '0');
+      else
+        re_tmp := shift_left(arg   => to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 - i downto 0))), 32),count => i);
+      end if;
+                           
 
       tmp_sign := v_reg.quo_sign;
 
