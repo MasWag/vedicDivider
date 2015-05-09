@@ -102,7 +102,7 @@ begin  -- architecture rtl
     -- i = 31 downto 0
     if rising_edge (mclk1) then
       v_reg                              := reg;
-      tmp_quo_reg                        := unsigned(v_reg.quo_reg (31 downto i));
+      tmp_quo_reg  (31-i downto 0)       := unsigned(v_reg.quo_reg (31 downto i));
       tmp_quo_reg_shifted                := unsigned(v_reg.quo_reg);
       tmp_quo_reg_shifted (i-1 downto 0) := (others => '0');
 
@@ -114,17 +114,8 @@ begin  -- architecture rtl
 
       v_reg.quo_reg (31 downto i) := (others => '0');
 
-      if i = 0 then
-        quo_tmp := (others => '0');
-      else
-        quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
-      end if;
-
-      if i = 31 then
-        re_tmp := (others => '0');
-      else
-        re_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg_shifted)) * to_integer(unsigned(b_n (30 - i downto 0))), 32);
-      end if;
+      quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
+      re_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg_shifted)) * to_integer(unsigned(b_n (30 - i downto 0))), 32);
 
 
       tmp_sign := v_reg.quo_sign;
