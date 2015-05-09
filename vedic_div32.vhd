@@ -123,7 +123,7 @@ begin  -- architecture rtl
       if i = 31 then
         re_tmp := (others => '0');
       else
-        re_tmp := shift_left(arg => to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 - i downto 0))), 32), count => i);
+        re_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg_shifted)) * to_integer(unsigned(b_n (30 - i downto 0))), 32);
       end if;
 
 
