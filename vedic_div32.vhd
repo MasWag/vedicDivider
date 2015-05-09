@@ -101,8 +101,7 @@ begin  -- architecture rtl
     -- i = 31 downto 0
     if rising_edge (mclk1) then
       v_reg := reg;
-      tmp_quo_reg := shift_right (arg   => unsigned (v_reg.quo_reg),
-                                  count => i);
+      tmp_quo_reg := unsigned(v_reg.quo_reg (31 downto i));
 
       if v_reg.quo_sign = '0' then
         v_reg.quo := std_logic_vector(unsigned(v_reg.quo) + shift_left(arg => tmp_quo_reg, count => i));
