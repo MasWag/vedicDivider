@@ -127,14 +127,13 @@ begin  -- architecture rtl
 
       tmp_sign := v_reg.quo_sign;
 
-      if tmp_sign /= v_reg.quo_sign then
-        v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) + quo_tmp);
-      elsif quo_reg_sub (32) = '0' then
-        v_reg.quo_reg := std_logic_vector(quo_reg_sub (31 downto 0));
-      else
+      if quo_reg_sub (32) = '1' then
         v_reg.quo_sign := not v_reg.quo_sign;
-        v_reg.quo_reg  := std_logic_vector((not quo_reg_sub (31 downto 0)) + 1);
+        quo_reg_sub (31 downto 0) := (not quo_reg_sub (31 downto 0)) + 1;
       end if;
+
+      v_reg.quo_reg := std_logic_vector(quo_reg_sub (31 downto 0));
+
 
       if tmp_sign /= v_reg.re_sign then
         v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) + re_tmp);
