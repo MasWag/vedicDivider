@@ -123,10 +123,10 @@ begin  -- architecture rtl
       if tmp_sign /= v_reg.quo_sign then
         v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) + quo_tmp);
       elsif unsigned(v_reg.quo_reg) > quo_tmp then
-        v_reg.quo_reg := std_logic_vector(to_unsigned(to_integer(unsigned(v_reg.quo_reg)) - to_integer(quo_tmp), 32));
+        v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) - quo_tmp);
       else
         v_reg.quo_sign := not v_reg.quo_sign;
-        v_reg.quo_reg  := std_logic_vector(to_unsigned(to_integer(quo_tmp) - to_integer(unsigned(v_reg.quo_reg)), 32));
+        v_reg.quo_reg  := std_logic_vector(quo_tmp - unsigned(v_reg.quo_reg));
       end if;
 
       if tmp_sign /= v_reg.re_sign then
