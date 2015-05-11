@@ -94,6 +94,8 @@ begin  -- architecture rtl
     variable tmp_quo_reg         : unsigned (31 downto 0) := (others   => '0');
     variable tmp_quo_reg_shifted : unsigned (31 downto 0) := (others   => '0');
     variable quo_tmp             : unsigned (31 downto 0) := (others   => '0');
+    variable quo_reg_sub         : unsigned (32 downto 0) := (others   => '0');
+    variable re_reg_sub          : unsigned (36 downto 0) := (others   => '0');
     variable re_tmp              : unsigned (31 downto 0) := (others   => '0');
     variable tmp_sign            : std_logic              := '0';
     variable v_reg               : reg_t                  := (quo_sign => '0', re_sign => '0', others => (others => '0'));
@@ -116,26 +118,28 @@ begin  -- architecture rtl
 
       quo_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg)) * to_integer(unsigned(b_n (30 downto 31 - i))), 32);
       re_tmp := to_unsigned(to_integer(unsigned(tmp_quo_reg_shifted)) * to_integer(unsigned(b_n (30 - i downto 0))), 32);
+      quo_reg_sub := unsigned('0' & v_reg.quo_reg) - ('0' & quo_tmp);
+      re_reg_sub := unsigned('0' & v_reg.re_reg) - ("00000" & re_tmp);
 
 
       tmp_sign := v_reg.quo_sign;
 
       if tmp_sign /= v_reg.quo_sign then
         v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) + quo_tmp);
-      elsif unsigned(v_reg.quo_reg) > quo_tmp then
-        v_reg.quo_reg := std_logic_vector(unsigned(v_reg.quo_reg) - quo_tmp);
+      elsif quo_reg_sub (32) = '0' then
+        v_reg.quo_reg := std_logic_vector(quo_reg_sub (31 downto 0));
       else
         v_reg.quo_sign := not v_reg.quo_sign;
-        v_reg.quo_reg  := std_logic_vector(quo_tmp - unsigned(v_reg.quo_reg));
+        v_reg.quo_reg  := std_logic_vector((not quo_reg_sub (31 downto 0)) + 1);
       end if;
 
       if tmp_sign /= v_reg.re_sign then
         v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) + re_tmp);
-      elsif unsigned(v_reg.re_reg) > re_tmp then
-        v_reg.re_reg := std_logic_vector(unsigned(v_reg.re_reg) - re_tmp);
+      elsif re_reg_sub (36) = '0' then
+        v_reg.re_reg := std_logic_vector(re_reg_sub (35 downto 0));
       else
         v_reg.re_sign := not v_reg.re_sign;
-        v_reg.re_reg  := std_logic_vector(re_tmp - unsigned(v_reg.re_reg));
+        v_reg.re_reg  := std_logic_vector(not re_reg_sub (35 downto 0) + 1);
       end if;
 
       -- from here
