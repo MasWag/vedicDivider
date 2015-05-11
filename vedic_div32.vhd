@@ -62,31 +62,31 @@ begin  -- architecture rtl
   -- type   : combinational
   -- inputs : divisor,dividend
   -- outputs: shifted_divisor,shift_val,re_reg,quo_reg,b_n
-  init_calc : process (mclk1,divisor, dividend) is
+  init_calc : process (divisor, dividend) is
   begin  -- process init_calc
-    if rising_edge (mclk1) then
-      for i in 31 downto 0 loop
-        next when divisor (i) = '0';
-        shift_val <= 31 - i;
-        b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (30 downto 0)),
-                                            count => 31-i));
-        init_reg.quo_reg (31 - i downto 0) <= dividend (31 downto i);
-        d_init_quo_reg (31 - i downto 0)   <= dividend (31 downto i);
-        if i = 0 then
-          init_reg.re_reg <= (others => '0');
-          d_init_quo_reg  <= (others => '0');
-        else
-          init_reg.quo_reg (31 downto 32 - i) <= (others => '0');
-          d_init_quo_reg (31 downto 32 - i)   <= (others => '0');
-          -- INFO:Xst:1608 - Relative priorities of control signals on register <init_reg.re_reg> differ from those commonly found in the selected device family. This will result in additional logic around the register.
-          init_reg.re_reg (30 downto 31 - i)  <= dividend (i - 1 downto 0);
-          d_init_re_reg (30 downto 31 - i)    <= dividend (i - 1 downto 0);
-          d_init_re_reg (30 - i downto 0)     <= (others => '0');
-          init_reg.re_reg (30 - i downto 0)   <= (others => '0');
-        end if;
-        exit;
-      end loop;  -- i
-    end if;
+
+    for i in 31 downto 0 loop
+      next when divisor (i) = '0';
+      shift_val <= 31 - i;
+      b_n <= std_logic_vector(shift_left (arg   => unsigned(divisor (30 downto 0)),
+                                          count => 31-i));
+      init_reg.quo_reg (31 - i downto 0) <= dividend (31 downto i);
+      d_init_quo_reg (31 - i downto 0)   <= dividend (31 downto i);
+      if i = 0 then
+        init_reg.re_reg <= (others => '0');
+        d_init_quo_reg  <= (others => '0');
+      else
+        init_reg.quo_reg (31 downto 32 - i) <= (others => '0');
+        d_init_quo_reg (31 downto 32 - i)   <= (others => '0');
+        -- INFO:Xst:1608 - Relative priorities of control signals on register <init_reg.re_reg> differ from those commonly found in the selected device family. This will result in additional logic around the register.
+        init_reg.re_reg (30 downto 31 - i)  <= dividend (i - 1 downto 0);
+        d_init_re_reg (30 downto 31 - i)    <= dividend (i - 1 downto 0);
+        d_init_re_reg (30 - i downto 0)     <= (others => '0');
+        init_reg.re_reg (30 - i downto 0)   <= (others => '0');
+      end if;
+      exit;
+    end loop;  -- i
+
   end process init_calc;
 
   -- purpose: main calc
