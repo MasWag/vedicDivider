@@ -199,19 +199,19 @@ begin  -- architecture rtl
     end if;
   end process fin_calc;
 
-  re <= std_logic_vector(i_re - to_integer(unsigned(divisor & "000"))) when i_re (31 downto 3) >= to_integer(unsigned(divisor)) else
+  re <= std_logic_vector(i_re - 8 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 8 else
         std_logic_vector(i_re - 7 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 7 else
-        std_logic_vector(i_re - 6 * to_integer(unsigned(divisor))) when i_re (31 downto 2) >= to_integer(unsigned(divisor)) * 3 else
+        std_logic_vector(i_re - 6 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 6 else
         std_logic_vector(i_re - 5 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 5 else
-        std_logic_vector(i_re - to_integer(unsigned(divisor & "00"))) when i_re (31 downto 2) >= to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re - 4 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 4 else
         std_logic_vector(i_re - 3 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 3 else
-        std_logic_vector(i_re - to_integer(unsigned(divisor & '0'))) when i_re (31 downto 1) >= to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re - 2 * to_integer(unsigned(divisor))) when i_re >= to_integer(unsigned(divisor)) * 2 else
         std_logic_vector(i_re - to_integer(unsigned(divisor)))     when i_re >= to_integer(unsigned(divisor)) else
         std_logic_vector(i_re)                                     when i_re >= 0 else
         std_logic_vector(i_re + to_integer(unsigned(divisor)))     when i_re >= -to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 2 * to_integer(unsigned(divisor))) when i_re (31 downto 1) >= - to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 2 * to_integer(unsigned(divisor))) when i_re >= - 2 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 3 * to_integer(unsigned(divisor))) when i_re >= - 3 * to_integer(unsigned(divisor)) else
-        std_logic_vector(i_re + 4 * to_integer(unsigned(divisor))) when i_re (31 downto 2) >= - to_integer(unsigned(divisor)) else
+        std_logic_vector(i_re + 4 * to_integer(unsigned(divisor))) when i_re >= - 4 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 5 * to_integer(unsigned(divisor))) when i_re >= - 5 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 6 * to_integer(unsigned(divisor))) when i_re >= - 6 * to_integer(unsigned(divisor)) else
         std_logic_vector(i_re + 7 * to_integer(unsigned(divisor))) when i_re >= - 7 * to_integer(unsigned(divisor)) else
