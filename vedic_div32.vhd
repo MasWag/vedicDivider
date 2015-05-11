@@ -40,6 +40,9 @@ architecture rtl of vedic_div32 is
   signal d_init_quo_reg : std_logic_vector (31 downto 0) := (others => '0');
   signal d_init_re_reg  : std_logic_vector (31 downto 0) := (others => '0');
   signal d_re           : std_logic_vector (35 downto 0) := (others => '0');
+  signal d_main_re_reg  : std_logic_vector (35 downto 0) := (others => '0');
+  signal d_re_tmp       : std_logic_vector (31 downto 0) := (others => '0');
+
 begin  -- architecture rtl
 
   with state select
@@ -79,7 +82,7 @@ begin  -- architecture rtl
         init_reg.re_reg (30 downto 31 - i)  <= dividend (i - 1 downto 0);
         d_init_re_reg (30 downto 31 - i)    <= dividend (i - 1 downto 0);
         d_init_re_reg (30 - i downto 0)     <= (others => '0');
-        init_reg.re_reg (31 - i downto 0)   <= (others => '0');
+        init_reg.re_reg (30 - i downto 0)   <= (others => '0');
       end if;
       exit;
     end loop;  -- i
@@ -139,8 +142,11 @@ begin  -- architecture rtl
         v_reg.re_reg := std_logic_vector(re_reg_sub (35 downto 0));
       else
         v_reg.re_sign := not v_reg.re_sign;
-        v_reg.re_reg  := std_logic_vector(not re_reg_sub (35 downto 0) + 1);
+        v_reg.re_reg  := std_logic_vector(not (re_reg_sub (35 downto 0)) + 1);
       end if;
+
+      d_re_tmp <= std_logic_vector(re_tmp);
+      d_main_re_reg <= init_reg.re_reg;
 
       -- from here
       -- i = 31 downto 0
